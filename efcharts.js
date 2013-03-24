@@ -99,7 +99,7 @@ EfCharts.prototype._parseData = function () {
 
   var xSeries = { values: [], title: '', axis: 'x' };
   this._seriesCollection.push(xSeries);
-  // creates absisse values
+  // creates x axis values
   for (i = 0; i < data.length; i++) {
     xSeries.values.push(data[i][0]);
   }
@@ -124,13 +124,11 @@ EfCharts.prototype._parseData = function () {
 
 };
 
-
 EfCharts.prototype._preRender = function () {
   // delete previous constructions
   this._container.innerHtml = '';
   this._canvases = [];
 };
-
 
 EfCharts.prototype._render = function () {
 
