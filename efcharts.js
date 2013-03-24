@@ -1,6 +1,3 @@
-var EfCharts = {};
-
-
 EfCharts = function (container, data) {
   this._init(container, data);
 };
@@ -23,7 +20,9 @@ EfCharts.prototype._init = function (container, data) {
   this._container = container;
   this._data = data;
 
-  this._predraw();
+  this._parseData();
+  this._preRender();
+  this._render();
 };
 
 EfCharts.prototype.xDomToValue = function (xDom) {
@@ -58,8 +57,8 @@ EfCharts.prototype.getXRange = function () {
   var data = this._data;
 
   for (var i = 0; i < data.length; i++) {
-      min = Math.min(min, data[i][0]);
-      max = Math.max(max, data[i][0]);
+    min = Math.min(min, data[i][0]);
+    max = Math.max(max, data[i][0]);
   }
 
   return [min, max];
@@ -79,17 +78,66 @@ EfCharts.prototype.getYRange = function () {
   return [min, max];
 };
 
-EfCharts.prototype._predraw = function () {
+EfCharts.isIntNullOrUndefined = function (integer) {
+  return isNaN(parseInt(integer, 10));
+};
+
+EfCharts.prototype._parseData = function () {
+  this._seriesCollection = [];
+  var data = this._data;
+
+  // verify number of columns
+  for (var i = 0; i < data.length; i++) {
+    if (!EfCharts.isIntNullOrUndefined(this._seriesCount) && this._seriesCount !== data[i].length) {
+      console.error('data is not valid. Number of columns are not constant.');
+      return;
+    }
+
+    this._seriesCount = data[i].length;
+    this._rowsCount = data.length;
+  }
+
+  var xSeries = { values: [], title: '', axis: 'x' };
+  this._seriesCollection.push(xSeries);
+  // creates absisse values
+  for (i = 0; i < data.length; i++) {
+    xSeries.values.push(data[i][0]);
+  }
+
+  // creates seriesCollection.
+  for (var j = 1; j < this._seriesCount; j++) {
+    var series = { values: [], title: '', axis:'y1', context : {} };
+    this._seriesCollection.push(series);
+    for (i = 0; i < data.length; i++) {
+      series.values.push(data[i][j]);
+    }
+  }
+
+  // creates y axes:
+  this._axes = {};
+  var axis = { range: this.getYRange(), title: '' };
+  this._axes.y1 = axis;
+
+  // creates absisse:
+  var xAxis = { range: this.getXRange(), title: '' };
+  this._axes.x = xAxis;
+
+};
+
+
+EfCharts.prototype._preRender = function () {
   // delete previous constructions
   this._container.innerHtml = '';
+  this._canvases = [];
+};
+
+
+EfCharts.prototype._render = function () {
 
   this._container.style.height = EfCharts.DEFAULT_HEIGHT + 'px';
   this._container.style.width = EfCharts.DEFAULT_WIDTH + 'px';
 
-  this._canvases = [];
-
-  var data = this._data;
-  for (var j = 1; j < data[0].length; j++) {
+  for (var j = 1; j < this._seriesCollection.length; j++) {
     var canvas = document.createElement('canvas');
 
     canvas.height = EfCharts.DEFAULT_HEIGHT;
@@ -98,14 +146,22 @@ EfCharts.prototype._predraw = function () {
 
     var ctx = canvas.getContext('2d');
 
-    ctx.lineWidth = 5.0;
+    ctx.lineWidth = 1.0;
     ctx.lineJoin = 'round';
     ctx.beginPath();
 
     // first point
-    ctx.moveTo(this.xValueToDom(data[0][0]), this.yValueToDom(data[0][j]));
-    for (var i = 1; i < data.length - 1; i++) {
-      ctx.lineTo(this.xValueToDom(data[i + 1][0]), this.yValueToDom(data[i + 1][j]));
+    var point = {
+      x: this._seriesCollection[0].values[0],
+      y: this._seriesCollection[j].values[0]
+    };
+    ctx.moveTo(this.xValueToDom(point.x), this.yValueToDom(point.y));
+    for (var i = 0; i < this._rowsCount - 1; i++) {
+      point = {
+        x: this._seriesCollection[0].values[i+1],
+        y: this._seriesCollection[j].values[i+1]
+      };
+      ctx.lineTo(this.xValueToDom(point.x), this.yValueToDom(point.y));
     }
 
     ctx.stroke();
