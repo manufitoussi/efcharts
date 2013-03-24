@@ -5,7 +5,7 @@ EfCharts = function (container, data) {
   this._init(container, data);
 };
 
-EfCharts.VERSION = '0.1.0';
+EfCharts.VERSION = '0.1';
 EfCharts.NAME = 'EfCharts';
 EfCharts.AUTHOR = 'Emmanuel Fitoussi';
 
