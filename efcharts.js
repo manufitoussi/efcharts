@@ -1,6 +1,7 @@
 /*jshint globalstrict: true */
-(function (window) {
+(function () {
   "use strict";
+  
   window.EfCharts = function (container, data) {
     this.init_(container, data);
   };
@@ -12,6 +13,14 @@
   EfCharts.DEFAULT_WIDTH = 480;
   EfCharts.DEFAULT_HEIGHT = 320;
 
+  EfCharts.isIntNullNaNOrUndefined = function (integer) {
+    return isNaN(parseInt(integer, 10));
+  };
+
+	EfCharts.log10 = function(value) {
+		return Math.log(value)/Math.LN10;
+	};
+	
   EfCharts.prototype.init_ = function (container, data) {
 
     if (!container) {
@@ -24,6 +33,7 @@
     this.data_ = data;
 
     this.parseData_();
+	  this.setupTicks_();
     this.preRender_();
     this.render_();
   };
@@ -66,6 +76,7 @@
 
     return [min, max];
   };
+  
   EfCharts.prototype.getYRange = function () {
     var max = -Infinity;
     var min = Infinity;
@@ -81,10 +92,6 @@
     return [min, max];
   };
 
-  EfCharts.isIntNullOrUndefined = function (integer) {
-    return isNaN(parseInt(integer, 10));
-  };
-
   EfCharts.prototype.parseData_ = function () {
     this.seriesCollection_ = [];
     var data = this.data_;
@@ -92,7 +99,7 @@
 
     // verify number of columns
     for (i = 0; i < data.length; i++) {
-      if (!EfCharts.isIntNullOrUndefined(this._seriesCount)
+      if (!EfCharts.isIntNullNaNOrUndefined(this._seriesCount)
             && this._seriesCount !== data[i].length) {
         console.error('data is not valid. Number of columns are not constant.');
         return;
@@ -127,6 +134,36 @@
     var xAxis = { range: this.getXRange(), title: '' };
     this.axes_.x = xAxis;
 
+  };
+	
+	EfCharts.getStepFromRange = function (start, end) {
+		var delta = end - start;
+		var decile = delta/10;
+		var order = -Math.floor(EfCharts.log10(decile));
+		var power = Math.pow(10, order);
+		var step = Math.round(decile*power);
+		if(step  !== 2 && step % 5 !== 0 && step !== 1) {
+			step = Math.ceil(step/5.0)*5;
+		}
+			
+		step = step/power;	
+		return step;
+	};
+  
+	EfCharts.getTicksFromRange = function(start, end) {
+		var tick;
+		var ticks = [];
+		var xStep = EfCharts.getStepFromRange(start, end);
+		var start = Math.ceil(start/xStep) * xStep;
+		for (tick=start; tick <= end; tick+=xStep) {
+			ticks.push(tick);
+		};
+		return ticks;
+	};
+	
+  EfCharts.prototype.setupTicks_ = function () {
+		var xRange = this.getXRange();
+		this.xTicks_ = EfCharts.getTicksFromRange(xRange[0], xRange[1]);
   };
 
   EfCharts.prototype.preRender_ = function () {
@@ -171,6 +208,17 @@
 
       this.container_.appendChild(canvas);
       this.canvases_.push(canvas);
+			
+			if(j===1) {
+				ctx.beginPath();
+				for(i=0; i<this.xTicks_.length; i++){
+					var xDom = this.xValueToDom(this.xTicks_[i]);
+					var yDom = this.yValueToDom(0);
+					ctx.moveTo(xDom, yDom);
+					ctx.lineTo(xDom, yDom-20);
+				}
+				ctx.stroke();
+			}
     }
   };
-}(window));
+}());
