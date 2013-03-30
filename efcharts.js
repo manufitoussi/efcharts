@@ -183,14 +183,22 @@
 
   EfCharts.prototype.render_ = function () {
     var i, j;
-    this.container_.style.height = EfCharts.DEFAULT_HEIGHT + 'px';
-    this.container_.style.width = EfCharts.DEFAULT_WIDTH + 'px';
-
+    // TODO: test size of container.
+    if(EfCharts.isStringNullEmptyOrUndefined(this.container_.style.height)) {
+      this.container_.style.height = EfCharts.DEFAULT_HEIGHT + 'px';
+    }
+    
+    if(EfCharts.isStringNullEmptyOrUndefined(this.container_.style.width)) {
+      this.container_.style.width = EfCharts.DEFAULT_WIDTH + 'px';
+    }
+    
+    this.width_ = parseInt(this.container_.style.width, 10);
+    this.height_ = parseInt(this.container_.style.height, 10);
     for (j = 1; j < this.seriesCollection_.length; j++) {
       var canvas = document.createElement('canvas');
 
-      canvas.height = EfCharts.DEFAULT_HEIGHT;
-      canvas.width = EfCharts.DEFAULT_WIDTH;
+      canvas.height = this.height_;
+      canvas.width = this.width_;
       canvas.style.position = 'absolute';
 
       var ctx = canvas.getContext('2d');
