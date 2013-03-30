@@ -50,16 +50,17 @@
 
   EfCharts.prototype.xValueToDom = function (xValue) {
     var xDom = 0;
-    var width = EfCharts.DEFAULT_WIDTH;
-    var range = this.getXRange();
+    var width = this.width_;
+    var range = this.axes_['x'].range;
     xDom = (xValue - range[0]) / (range[1] - range[0]) * width;
     return xDom;
   };
 
-  EfCharts.prototype.yValueToDom = function (yValue) {
+  EfCharts.prototype.yValueToDom = function (yValue, opt_axisId) {
     var yDom = 0;
-    var height = EfCharts.DEFAULT_HEIGHT;
-    var range = this.getYRange();
+    var height = this.height_;
+    opt_axisId =EfCharts.isIntNullOrUndefined( opt_axisId)? 1 : opt_axisId;
+    var range = this.axes_['y' + opt_axisId].range;
     yDom = (1 - (yValue - range[0]) / (range[1] - range[0])) * height;
     return yDom;
   };
