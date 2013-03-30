@@ -167,6 +167,7 @@
 		for (tick=start; tick <= end; tick+=xStep) {
 			ticks.push(tick);
 		};
+		console.log(ticks);
 		return ticks;
 	};
 	
@@ -182,7 +183,22 @@
   };
 
   EfCharts.prototype.render_ = function () {
-    var i, j;
+    var i,
+        j,
+        series, 
+        canvas,
+        point,
+        min,
+        max,
+        currentXDom, 
+        yIn,
+        yOut,
+        nb;
+    var xSeries = this.seriesCollection_[0];
+    var round = function(val) {
+      return  Math.ceil(val);// Math.ceil(Math.round(val*10)/5) * 5/10;
+    };
+    
     // TODO: test size of container.
     if(EfCharts.isStringNullEmptyOrUndefined(this.container_.style.height)) {
       this.container_.style.height = EfCharts.DEFAULT_HEIGHT + 'px';
@@ -194,8 +210,11 @@
     
     this.width_ = parseInt(this.container_.style.width, 10);
     this.height_ = parseInt(this.container_.style.height, 10);
+    console.log('points drawing...');
+    
     for (j = 1; j < this.seriesCollection_.length; j++) {
-      var canvas = document.createElement('canvas');
+      canvas = document.createElement('canvas');
+      series = this.seriesCollection_[j];
 
       canvas.height = this.height_;
       canvas.width = this.width_;
@@ -203,30 +222,75 @@
 
       var ctx = canvas.getContext('2d');
 
-      ctx.lineWidth = 1.0;
+      ctx.lineWidth = 1;
       ctx.lineJoin = 'round';
       ctx.beginPath();
 
-      // first point
-      var point = {
-        x: this.seriesCollection_[0].values[0],
-        y: this.seriesCollection_[j].values[0]
+     // first point
+      point = {
+        x: xSeries.values[0],
+        y: series.values[0],
+        xDom : this.xValueToDom(xSeries.values[0])
       };
-      ctx.moveTo(this.xValueToDom(point.x), this.yValueToDom(point.y));
-      for (i = 0; i < this._rowsCount - 1; i++) {
-        point = {
-          x: this.seriesCollection_[0].values[i + 1],
-          y: this.seriesCollection_[j].values[i + 1]
+      
+      ctx.moveTo(currentXDom, this.yValueToDom(point.y));
+      min = point.y;
+      max = point.y;
+      yIn = point.y;
+      yOut = point.y;
+      nb = 1;
+      currentXDom = round(point.xDom);
+      
+      ctx.moveTo(currentXDom, this.yValueToDom(point.y));
+      var sd = new Date();
+      for (i = 1; i < this._rowsCount; i++) {
+         point = {
+          x: xSeries.values[i],
+          y: series.values[i],
+          xDom : this.xValueToDom(xSeries.values[i])
         };
-        ctx.lineTo(this.xValueToDom(point.x), this.yValueToDom(point.y));
+        
+        if(currentXDom === round(point.xDom)) {
+          if(max < point.y) {
+            max = point.y;
+          }
+          
+          if(min > point.y) {
+            min = point.y;
+          }
+          
+          yOut = point.y;
+          nb++;
+        } else {
+          // draw column
+          ctx.lineTo(currentXDom, this.yValueToDom(yIn));
+          ctx.moveTo(currentXDom, this.yValueToDom(min));
+          ctx.lineTo(currentXDom, this.yValueToDom(max));
+          ctx.moveTo(currentXDom, this.yValueToDom(yOut));
+          
+          // reset stats
+          min = point.y;
+          max = point.y;
+          currentXDom = round(point.xDom);
+          yIn = point.y;
+          yOut = point.y;
+          nb = 1;
+        }
+        
+        //ctx.lineTo(point.xDom, this.yValueToDom(point.y));
+         
       }
 
+       var ed = new Date();
+       console.log(ed.getTime() -sd.getTime());
       ctx.stroke();
-
+     
+      
       this.container_.appendChild(canvas);
       this.canvases_.push(canvas);
 			
 			if(j===1) {
+				console.log('ticks drawing...');
 				ctx.beginPath();
 				for(i=0; i<this.xTicks_.length; i++){
 					var xDom = this.xValueToDom(this.xTicks_[i]);
@@ -235,7 +299,10 @@
 					ctx.lineTo(xDom, yDom-20);
 				}
 				ctx.stroke();
+				console.log('ticks drawn.');
 			}
     }
+    
+    console.log('points drawn.');
   };
 }());

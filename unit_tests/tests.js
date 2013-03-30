@@ -92,9 +92,9 @@
 		var testRange = function(start, end, result) {
 			strictEqual(EfCharts.getStepFromRange(start, end), result, '[' + start +',' + end  +'] -> ' + result);
 		};
-		testRange(0.4,0.6, 0.02);
-		testRange(0,0.6, 0.1);
-		testRange(0,4.1, 0.5);
+		testRange(0.4,0.6,0.02);
+		testRange(0,0.6,0.1);
+		testRange(0,4.1,0.5);
 		testRange(1,9, 1);
 		testRange(1,10, 1);
 		testRange(0,12,1);
@@ -111,8 +111,9 @@
 			deepEqual(EfCharts.getTicksFromRange(start, end), result, '[' + start +',' + end  +'] -> ok');
 		};
     
-		testRange(0,4.1, [0,0.5,1,1.5,2,2.5,3,3.5,4]);
+		testRange(0,4.1,[0,0.5,1,1.5,2,2.5,3,3.5,4]);
 		testRange(1,9,[1,2,3,4,5,6,7,8,9]);
+		testRange(0,9,[0,1,2,3,4,5,6,7,8,9]);
 		testRange(1,10, [1,2,3,4,5,6,7,8,9,10]);
 		testRange(0,12,[0,1,2,3,4,5,6,7,8,9,10,11,12]);
 		testRange(0,25,[0,5,10,15,20,25]);
