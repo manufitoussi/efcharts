@@ -17,6 +17,14 @@
     return isNaN(parseInt(integer, 10));
   };
 
+  EfCharts.isIntNullOrUndefined = function (integer) {
+    return isNaN(parseInt(integer, 10));
+  };
+  
+  EfCharts.isStringNullEmptyOrUndefined = function (str) {
+    return str === null || str === undefined || str === '';
+  };
+
 	EfCharts.log10 = function(value) {
 		return Math.log(value)/Math.LN10;
 	};
