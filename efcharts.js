@@ -74,15 +74,9 @@
   };
 
   EfCharts.prototype.getXRange = function () {
-    var max = -Infinity;
-    var min = Infinity;
     var data = this.data_;
-    var i;
-    for (i = 0; i < data.length; i++) {
-      min = Math.min(min, data[i][0]);
-      max = Math.max(max, data[i][0]);
-    }
-
+    var min = data[0][0];
+    var max = data[data.length-1][0];
     return [min, max];
   };
   
