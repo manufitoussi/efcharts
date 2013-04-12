@@ -41,6 +41,31 @@
     var charts = new EfCharts(div, EfCharts.Tests.data);
     ok(charts, 'Created!');
   });
+	
+  test('efcharts default sizes', function () {
+    var testSize = function(obj, objName) {
+			strictEqual(parseInt(obj.width, 10), EfCharts.DEFAULT_WIDTH, objName + ' width OK');
+	    strictEqual(parseInt(obj.height, 10), EfCharts.DEFAULT_HEIGHT, objName + ' height OK');
+    };
+		
+		var div = document.getElementById('efcharts');
+		
+    var charts = new EfCharts(div, EfCharts.Tests.data);
+    
+		// container
+		testSize(charts.container_.style, 'container.style');
+		
+		//canvasess
+		var canvases = charts.getCanvases();
+		for (var i=0; i < canvases.length; i++) {
+			testSize(canvases[i], 'canvas ' + i);
+		};
+		
+		// xTicks
+		
+		// yTicks
+		
+  });
 
   test('ranges', function () {
     var div = document.getElementById('efcharts');
