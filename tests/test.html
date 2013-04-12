@@ -7,31 +7,38 @@
 </head>
 <body>
     <h1>EfCharts test page</h1>
-    <div id="efcharts" style="width:1200px; height:300px;"></div>
+    <div id="efcharts" style="width:300px; height:200px;"></div>
 
     <script>
 		var i;
-		var N = 1000;
-        var div = document.getElementById('efcharts');
-        var data = [
-            [0, 10, 50, 60],
-            [1, 20, 40, 40],
-            [2, 15, 30, 20],
-            [3, 25, 20, -10]
+		var N = 10000;
+    var div = document.getElementById('efcharts');
+    var data1 = [
+      [0, 10, 50, 60],
+      [1, 20, 40, 40],
+      [2, 15, 30, 20],
+      [3, 25, 20, -10]
 		];
+    var data2 = [
+      [0, 25],
+      [1, 50],
+      [2, 0],
+      [3, 50]
+];
 		console.log('points creation...');	
 		var randY = function(max) { return Math.random()*max;};
 		var dataVolume = [];
 		for(i=0; i<N; i++){
 			dataVolume.push([i, 
-			//100*(1-Math.cos(2*Math.PI *i/N*100)), 
+			100*(1-Math.cos(2*Math.PI *i/N*100)), 
 			randY(N) +i, 
-			//100*(1-Math.cos(2*Math.PI *i/N*50) + randY(.5))
+			100*(1-Math.cos(2*Math.PI *i/N*50) + randY(.5))
 			])
 		}
 		
 		console.log('points created.');	
-        var chart = new EfCharts(div, dataVolume);
+        //var chart = new EfCharts(div, data2);
+				var chart = new EfCharts(div, dataVolume);
     </script>
 </body>
 </html>

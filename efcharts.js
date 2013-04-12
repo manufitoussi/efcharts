@@ -25,10 +25,10 @@
     return str === null || str === undefined || str === '';
   };
 
-	EfCharts.log10 = function(value) {
-		return Math.log(value)/Math.LN10;
-	};
-	
+  EfCharts.log10 = function(value) {
+    return Math.log(value)/Math.LN10;
+  };
+  
   EfCharts.prototype.init_ = function (container, data) {
 
     if (!container) {
@@ -41,7 +41,7 @@
     this.data_ = data;
 
     this.parseData_();
-	  this.setupTicks_();
+    this.setupTicks_();
     this.preRender_();
     this.render_();
   };
@@ -67,7 +67,7 @@
   EfCharts.prototype.yValueToDom = function (yValue, opt_axisId) {
     var yDom = 0;
     var height = this.height_;
-    opt_axisId =EfCharts.isIntNullOrUndefined( opt_axisId)? 1 : opt_axisId;
+    opt_axisId =EfCharts.isIntNullOrUndefined(opt_axisId)? 1 : opt_axisId;
     var range = this.axes_['y' + opt_axisId].range;
     yDom = (1 - (yValue - range[0]) / (range[1] - range[0])) * height;
     return yDom;
@@ -109,7 +109,7 @@
       }
 
       this._seriesCount = data[i].length;
-      this._rowsCount = data.length;
+      this.rowsCount_ = data.length;
     }
 
     var xSeries = { values: [], title: '', axis: 'x' };
@@ -138,42 +138,50 @@
     this.axes_.x = xAxis;
 
   };
-	
-	EfCharts.getStepFromRange = function (start, end) {
-		var delta = end - start;
-		var decile = delta/10;
-		var order = -Math.floor(EfCharts.log10(decile));
-		var power = Math.pow(10, order);
-		var step = Math.round(decile*power);
-		if(step  !== 2 && step % 5 !== 0 && step !== 1) {
-			step = Math.ceil(step/5.0)*5;
-		}
-			
-		step = step/power;	
-		return step;
-	};
   
-	EfCharts.getTicksFromRange = function(start, end) {
-		var tick;
-		var ticks = [];
-		var xStep = EfCharts.getStepFromRange(start, end);
-		var start = Math.ceil(start/xStep) * xStep;
-		for (tick=start; tick <= end; tick+=xStep) {
-			ticks.push(tick);
-		};
-		console.log(ticks);
-		return ticks;
-	};
-	
+  EfCharts.getStepFromRange = function (start, end) {
+    var delta = end - start;
+    var decile = delta/10;
+    var order = -Math.floor(EfCharts.log10(decile));
+    var power = Math.pow(10, order);
+    var step = Math.round(decile*power);
+    if(step  !== 2 && step % 5 !== 0 && step !== 1) {
+      step = Math.ceil(step/5.0)*5;
+    }
+      
+    step = step/power;  
+    return step;
+  };
+  
+  EfCharts.getTicksFromRange = function(start, end) {
+    var tick;
+    var ticks = [];
+    var xStep = EfCharts.getStepFromRange(start, end);
+    var start = Math.ceil(start/xStep) * xStep;
+    for (tick=start; tick <= end; tick+=xStep) {
+      ticks.push(tick);
+    }
+    return ticks;
+  };
+  
   EfCharts.prototype.setupTicks_ = function () {
-		var xRange = this.getXRange();
-		this.xTicks_ = EfCharts.getTicksFromRange(xRange[0], xRange[1]);
+    var xRange = this.getXRange();
+    this.xTicks_ = EfCharts.getTicksFromRange(xRange[0], xRange[1]);
   };
 
   EfCharts.prototype.preRender_ = function () {
     // delete previous constructions
     this.container_.innerHtml = '';
     this.canvases_ = [];
+  };
+  
+  EfCharts.prototype.newCanvas_ = function(id){
+    var canvas = document.createElement('canvas');
+    canvas.id = id;
+    canvas.height = this.height_;
+    canvas.width = this.width_;
+    canvas.style.position = 'absolute';
+    return canvas;
   };
 
   EfCharts.prototype.render_ = function () {
@@ -182,15 +190,52 @@
         series, 
         canvas,
         point,
-        min,
-        max,
-        currentXDom, 
-        yIn,
-        yOut,
-        nb;
+        column,
+        columns;     
     var xSeries = this.seriesCollection_[0];
     var round = function(val) {
-      return  Math.ceil(val);// Math.ceil(Math.round(val*10)/5) * 5/10;
+      return  Math.floor(val);// Math.ceil(Math.round(val*10)/5) * 5/10;
+    };
+    
+    var createPoint = function(chart, xSeries, series, xIdx) {
+      return {
+        x: xSeries.values[xIdx],
+        y: series.values[xIdx],
+        xDom : chart.xValueToDom(xSeries.values[xIdx])
+      }
+    };
+    var drawColumn = function(chart, ctx, column){
+      ctx.moveTo(column.xDom, chart.yValueToDom(column.yMin));
+      ctx.lineTo(column.xDom, chart.yValueToDom(column.yMax));
+    };
+    
+    var drawConnection = function(chart, ctx, column){
+      ctx.lineTo(column.xDom, chart.yValueToDom(column.yIn));
+      ctx.moveTo(column.xDom, chart.yValueToDom(column.yOut));
+    };
+     
+    var resetColumn = function(point) {
+      return {
+        yMin : point.y,
+        yMax : point.y,
+        yIn : point.y,
+        yOut : point.y,
+        nb : 1,
+        xDom : round(point.xDom)
+      };
+    };
+    
+     var updateColumn = function(column, point) {
+      if(column.yMax < point.y) {
+        column.yMax = point.y;
+      }
+            
+      if(column.yMin > point.y) {
+        column.yMin = point.y;
+      }
+      
+      column.yOut = point.y;
+      column.nb++;
     };
     
     // TODO: test size of container.
@@ -204,99 +249,90 @@
     
     this.width_ = parseInt(this.container_.style.width, 10);
     this.height_ = parseInt(this.container_.style.height, 10);
-    console.log('points drawing...');
+    
+	console.log('points drawing...');
     
     for (j = 1; j < this.seriesCollection_.length; j++) {
-      canvas = document.createElement('canvas');
       series = this.seriesCollection_[j];
-
-      canvas.height = this.height_;
-      canvas.width = this.width_;
-      canvas.style.position = 'absolute';
-
+      canvas = this.newCanvas_('series-' +j);
       var ctx = canvas.getContext('2d');
 
       ctx.lineWidth = 1;
       ctx.lineJoin = 'round';
       ctx.beginPath();
 
-     // first point
-      point = {
-        x: xSeries.values[0],
-        y: series.values[0],
-        xDom : this.xValueToDom(xSeries.values[0])
-      };
-      
-      ctx.moveTo(currentXDom, this.yValueToDom(point.y));
-      min = point.y;
-      max = point.y;
-      yIn = point.y;
-      yOut = point.y;
-      nb = 1;
-      currentXDom = round(point.xDom);
-      
-      ctx.moveTo(currentXDom, this.yValueToDom(point.y));
+      columns = [];
       var sd = new Date();
-      for (i = 1; i < this._rowsCount; i++) {
-         point = {
-          x: xSeries.values[i],
-          y: series.values[i],
-          xDom : this.xValueToDom(xSeries.values[i])
-        };
+      
+      // draw points
+      for (i = 0; i < this.rowsCount_; i++) {
         
-        if(currentXDom === round(point.xDom)) {
-          if(max < point.y) {
-            max = point.y;
-          }
-          
-          if(min > point.y) {
-            min = point.y;
-          }
-          
-          yOut = point.y;
-          nb++;
-        } else {
-          // draw column
-          ctx.lineTo(currentXDom, this.yValueToDom(yIn));
-          ctx.moveTo(currentXDom, this.yValueToDom(min));
-          ctx.lineTo(currentXDom, this.yValueToDom(max));
-          ctx.moveTo(currentXDom, this.yValueToDom(yOut));
-          
-          // reset stats
-          min = point.y;
-          max = point.y;
-          currentXDom = round(point.xDom);
-          yIn = point.y;
-          yOut = point.y;
-          nb = 1;
-        }
-        
-        //ctx.lineTo(point.xDom, this.yValueToDom(point.y));
-         
-      }
+        point = createPoint(this, xSeries, series, i);
 
-       var ed = new Date();
-       console.log(ed.getTime() -sd.getTime());
+        if(i === 0) {
+          // first point
+          // create the first column.
+          column = resetColumn(point);
+        } else {
+          if(column.xDom === round(point.xDom)) {
+            // same column.
+            // update stats.
+            updateColumn(column, point);
+          } else {
+            // another column
+            // draw the previous and create the new one.
+            drawColumn(this, ctx, column);
+            columns.push(column);
+            column = resetColumn(point);
+          }
+          
+          if(i === (this.rowsCount_ - 1)) {
+            // force drawing the last point.
+            drawColumn(this, ctx, column);
+            columns.push(column);
+          }
+        }
+     }
+      
       ctx.stroke();
-     
+      
+      
+      // draw conections
+      // using columns.
+      ctx.beginPath();
+      for(i=0; i<columns.length; i++) {
+        column = columns[i];
+        drawConnection(this, ctx, column);
+      }
+      
+      ctx.stroke();
+
+      var ed = new Date();
+      console.log('time duration (ms): ' + (ed.getTime() -sd.getTime()));
       
       this.container_.appendChild(canvas);
       this.canvases_.push(canvas);
-			
-			if(j===1) {
-				console.log('ticks drawing...');
-				ctx.beginPath();
-				for(i=0; i<this.xTicks_.length; i++){
-					var xDom = this.xValueToDom(this.xTicks_[i]);
-					var yDom = this.yValueToDom(0);
-					ctx.moveTo(xDom, yDom);
-					ctx.lineTo(xDom, yDom-20);
-				}
-				ctx.stroke();
-				console.log('ticks drawn.');
-			}
+    }
+        
+    console.log('points drawn.');
+    
+    console.log('ticks drawing...');
+    
+    this.canvasTicksX_ = this.newCanvas_('x-ticks');
+    ctx = this.canvasTicksX_.getContext('2d');  
+    ctx.lineWidth = 3;
+    ctx.lineJoin = 'round'; 
+    ctx.beginPath();
+    for(i=0; i<this.xTicks_.length; i++){
+      var xDom = this.xValueToDom(this.xTicks_[i]);
+      var yDom = this.yValueToDom(0);
+      //console.log('tick: ' + this.xTicks_[i] + ', ' + yDom);
+      ctx.moveTo(xDom, this.height_);
+      ctx.lineTo(xDom, this.height_-20);
     }
     
-    console.log('points drawn.');
+    ctx.stroke();
+    this.container_.appendChild(this.canvasTicksX_);
+    console.log('ticks drawn.');
   };
 }());
