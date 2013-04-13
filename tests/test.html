@@ -25,7 +25,7 @@
       [2, 0],
       [3, 50]
 ];
-		console.log('points creation...');	
+		EfCharts.info('points creation...');	
 		var randY = function(max) { return Math.random()*max;};
 		var dataVolume = [];
 		for(i=0; i<N; i++){
@@ -36,7 +36,7 @@
 			])
 		}
 		
-		console.log('points created.');	
+		EfCharts.info('points created.');	
         //var chart = new EfCharts(div, data2);
 				var chart = new EfCharts(div, dataVolume);
     </script>

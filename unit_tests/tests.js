@@ -35,6 +35,23 @@
     strictEqual(EfCharts.isIntNullNaNOrUndefined(null), true, 'null');
     strictEqual(EfCharts.isIntNullNaNOrUndefined(undefined), true, 'undefined');
   });
+  
+  test('log', function() {
+    EfCharts.log('test log.');
+    ok(true, 'log ok');
+    
+    EfCharts.debug('test debug.');
+    ok(true, 'debug ok');
+
+    EfCharts.info('test info.');
+    ok(true, 'info ok');
+
+    EfCharts.warn('test warn.');
+    ok(true, 'warn ok');
+    
+    EfCharts.error('test error.');
+    ok(true, 'error ok');
+  });
 
   test('efcharts creation', function () {
     var div = document.getElementById('efcharts');

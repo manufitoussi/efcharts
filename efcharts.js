@@ -12,6 +12,80 @@
 
   EfCharts.DEFAULT_WIDTH = 480;
   EfCharts.DEFAULT_HEIGHT = 320;
+  
+  EfCharts.DEBUG = true;
+  
+  /**
+  *
+  */
+  EfCharts.log = function(message, opt_type) {
+    if(EfCharts.DEBUG) {
+      if(console.log === undefined) {
+        // do nothing if log doesn't exist.
+        console.log = function(message) {};
+      }
+      
+      if(typeof(message) === 'object' 
+          || opt_type === undefined) {
+        // default log.
+        console.log(message);
+      } else if(console[opt_type] !== undefined) {
+        console[opt_type](message);
+      } else {
+        console.log('[' + opt_type + ']' + message);
+      }
+    }
+  };
+  
+  EfCharts.debug = function(message) {
+    EfCharts.log(message, 'debug');
+  };
+  
+  EfCharts.warn = function(message) {
+    EfCharts.log(message, 'warn');
+  };
+  
+  EfCharts.info = function(message) {
+    EfCharts.log(message, 'info');
+  };
+  
+  EfCharts.error = function(message) {
+    EfCharts.log(message, 'error');
+  };
+  
+  /**
+  *
+  */
+  EfCharts.time = function(flag) {
+    if(EfCharts.DEBUG) {
+      if(typeof(console.time) === 'function') {
+        console.time(flag);
+      } else {
+        if(EfCharts.timeFlags_ === undefined) {
+          EfCharts.timeFlags_ = {};
+        } else {
+          EfCharts.timeFlags_[flag] = new Date(); 
+        }
+      }
+    }
+  };
+  
+  /**
+  *
+  */
+  EfCharts.timeEnd = function(flag) {
+    if(EfCharts.DEBUG) {
+      if(typeof(console.timeEnd) === 'function') {
+        console.timeEnd(flag);
+      } else {
+        if(EfCharts.timeFlags_ !== undefined
+        && EfCharts.timeFlags_.hasOwnProperty(flag)) {
+          EfCharts.debug(flag + ': ' 
+          + (new Date().getTime() - EfCharts.timeFlags_[flag].getTime()) + 'ms');
+        }
+      }
+    }
+  };
 
   EfCharts.isIntNullNaNOrUndefined = function (integer) {
     return isNaN(parseInt(integer, 10));
@@ -33,7 +107,7 @@
 
     if (!container) {
       // error
-      console.error('container must be set.');
+      EfCharts.error('container must be set.');
       return;
     }
 
@@ -47,12 +121,12 @@
   };
 
   EfCharts.prototype.xDomToValue = function (xDom) {
-    console.error('not implemented.');
+    EfCharts.error('not implemented.');
     return null;
   };
 
   EfCharts.prototype.yDomToValue = function (yDom) {
-    console.error('not implemented.');
+    EfCharts.error('not implemented.');
     return null;
   };
 
@@ -104,7 +178,7 @@
     for (i = 0; i < data.length; i++) {
       if (!EfCharts.isIntNullNaNOrUndefined(this._seriesCount)
             && this._seriesCount !== data[i].length) {
-        console.error('data is not valid. Number of columns are not constant.');
+        EfCharts.error('data is not valid. Number of columns are not constant.');
         return;
       }
 
@@ -250,7 +324,7 @@
     this.width_ = parseInt(this.container_.style.width, 10);
     this.height_ = parseInt(this.container_.style.height, 10);
     
-	console.log('points drawing...');
+    EfCharts.info('points drawing...');
     
     for (j = 1; j < this.seriesCollection_.length; j++) {
       series = this.seriesCollection_[j];
@@ -262,7 +336,8 @@
       ctx.beginPath();
 
       columns = [];
-      var sd = new Date();
+      
+      EfCharts.time('draw points of series [' + j + ']');
       
       // draw points
       for (i = 0; i < this.rowsCount_; i++) {
@@ -296,7 +371,6 @@
       
       ctx.stroke();
       
-      
       // draw conections
       // using columns.
       ctx.beginPath();
@@ -306,17 +380,14 @@
       }
       
       ctx.stroke();
-
-      var ed = new Date();
-      console.log('time duration (ms): ' + (ed.getTime() -sd.getTime()));
+      EfCharts.timeEnd('draw points of series [' + j + ']');
       
       this.container_.appendChild(canvas);
       this.canvases_.push(canvas);
     }
         
-    console.log('points drawn.');
-    
-    console.log('ticks drawing...');
+    EfCharts.info('points drawn.');
+    EfCharts.info('ticks drawing...');
     
     this.canvasTicksX_ = this.newCanvas_('x-ticks');
     ctx = this.canvasTicksX_.getContext('2d');  
@@ -326,13 +397,12 @@
     for(i=0; i<this.xTicks_.length; i++){
       var xDom = this.xValueToDom(this.xTicks_[i]);
       var yDom = this.yValueToDom(0);
-      //console.log('tick: ' + this.xTicks_[i] + ', ' + yDom);
       ctx.moveTo(xDom, this.height_);
       ctx.lineTo(xDom, this.height_-20);
     }
     
     ctx.stroke();
     this.container_.appendChild(this.canvasTicksX_);
-    console.log('ticks drawn.');
+    EfCharts.info('ticks drawn.');
   };
 }());
