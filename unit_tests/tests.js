@@ -11,6 +11,18 @@
   EfCharts.prototype.getCanvases = function () {
     return this.canvases_;
   };
+  
+  EfCharts.prototype.getCanvasTicksX = function () {
+    return this.canvasTicksX_;
+  };
+  
+  EfCharts.prototype.getCanvasOver = function () {
+    return this.canvasOver_;
+  };
+  
+  EfCharts.prototype.getContainer = function () {
+    return this.container_;
+  };
 
   EfCharts.prototype.getAxes = function () {
     return this.axes_;
@@ -23,7 +35,24 @@
     [2, 15, 30, 20],
     [3, 25, 20, -5]
   ];
-
+  
+   EfCharts.Tests.createCharts = function(opt_width, opt_height) {
+    var div = document.getElementById('efcharts');
+    
+    if(opt_width !== undefined) {
+      EfCharts.debug('Change width.');
+      div.style.width = opt_width + 'px';
+    }
+    
+    if(opt_height !== undefined) {
+      EfCharts.debug('Change height.');
+      div.style.height = opt_height + 'px';
+    }
+    
+    var charts = new EfCharts(div, EfCharts.Tests.data);
+    return charts;
+  };
+  
   test('isIntNullOrUndefined', function () {
     strictEqual(EfCharts.isIntNullNaNOrUndefined(0), false, '0');
     strictEqual(EfCharts.isIntNullNaNOrUndefined(0.0), false, '0.0');
@@ -54,39 +83,65 @@
   });
 
   test('efcharts creation', function () {
-    var div = document.getElementById('efcharts');
-    var charts = new EfCharts(div, EfCharts.Tests.data);
+    var charts = EfCharts.Tests.createCharts();
     ok(charts, 'Created!');
   });
-	
-  test('efcharts default sizes', function () {
-    var testSize = function(obj, objName) {
-			strictEqual(parseInt(obj.width, 10), EfCharts.DEFAULT_WIDTH, objName + ' width OK');
-	    strictEqual(parseInt(obj.height, 10), EfCharts.DEFAULT_HEIGHT, objName + ' height OK');
+  
+  EfCharts.Tests.sizeTest = function (opt_width, opt_height) {
+
+    var charts = EfCharts.Tests.createCharts(opt_width, opt_height);
+    
+    var expected = {
+      width : opt_width === undefined ? EfCharts.DEFAULT_WIDTH : opt_width,
+      height : opt_height === undefined ? EfCharts.DEFAULT_HEIGHT : opt_height
     };
-		
-		var div = document.getElementById('efcharts');
-		
-    var charts = new EfCharts(div, EfCharts.Tests.data);
+    
+    var testSize = function(obj, objName) {
+			strictEqual(parseInt(obj.width, 10), expected.width, objName + ' width OK');
+	    strictEqual(parseInt(obj.height, 10), expected.height, objName + ' height OK');
+    };
+    
+    // TODO: test width_ and height_
     
 		// container
-		testSize(charts.container_.style, 'container.style');
+		testSize(charts.getContainer().style, 'container.style');
 		
 		//canvasess
 		var canvases = charts.getCanvases();
 		for (var i=0; i < canvases.length; i++) {
 			testSize(canvases[i], 'canvas ' + i);
 		};
+
+		// over
+		testSize(charts.getCanvasOver(), 'over canvas');
 		
 		// xTicks
-		
+		testSize(charts.getCanvasTicksX(), 'xTicks canvas');
+    
 		// yTicks
-		
+		// TODO
+  };
+	
+  test('efcharts default sizes', function () {
+    EfCharts.Tests.sizeTest();
+  });
+  
+  test('efcharts width', function () {
+    EfCharts.Tests.sizeTest(500);
+  });
+  
+   test('efcharts height', function () {
+    EfCharts.Tests.sizeTest(undefined, 500);
+  });
+  
+  test('efcharts sizes', function () {
+    EfCharts.Tests.sizeTest(1000, 500);
   });
 
+
+
   test('ranges', function () {
-    var div = document.getElementById('efcharts');
-    var charts = new EfCharts(div, EfCharts.Tests.data);
+    var charts = EfCharts.Tests.createCharts();
     var xRange = charts.getXRange();
     var yRange = charts.getYRange();
     deepEqual(xRange, [0, 3], 'xRange');
@@ -95,8 +150,7 @@
   });
 
   test('xValueToDom', function () {
-    var div = document.getElementById('efcharts');
-    var charts = new EfCharts(div, EfCharts.Tests.data);
+    var charts = EfCharts.Tests.createCharts();
     var xRange = charts.getXRange();
     var x;
     for (x = -2; x < (EfCharts.Tests.data.length + 2); x++) {
@@ -108,8 +162,7 @@
   });
 
   test('yValueToDom', function () {
-    var div = document.getElementById('efcharts');
-    var charts = new EfCharts(div, EfCharts.Tests.data);
+    var charts = EfCharts.Tests.createCharts();
     var yRange = charts.getYRange();
     var y;
     for (y = yRange[0] - 20; y < yRange[1] + 20; y += 10) {
@@ -121,8 +174,7 @@
   });
 
   test('series count', function () {
-    var div = document.getElementById('efcharts');
-    var charts = new EfCharts(div, EfCharts.Tests.data);
+    var charts = EfCharts.Tests.createCharts();
     var count = EfCharts.Tests.data[0].lenght;
     strictEqual(charts.getAllSeries().lenght, count, 'nb of series');
     strictEqual(charts.getCanvases().lenght, count, 'nb of canvas');
