@@ -1,20 +1,20 @@
-/*jshint globalstrict: true */
+/*jshint globalstrict: true, browser: true, devel: true */
+/*global EfCharts:false */
 (function () {
   "use strict";
-  
   window.EfCharts = function (container, data) {
     this.init_(container, data);
   };
-
+  
   EfCharts.VERSION = '0.1';
   EfCharts.NAME = 'EfCharts';
   EfCharts.AUTHOR = 'Emmanuel Fitoussi';
 
   EfCharts.DEFAULT_WIDTH = 480;
   EfCharts.DEFAULT_HEIGHT = 320;
-  
+
   EfCharts.DEBUG = true;
-  
+
   /**
   *
   */
@@ -22,11 +22,11 @@
     if(EfCharts.DEBUG) {
       if(console.log === undefined) {
         // do nothing if log doesn't exist.
-        console.log = function(message) {};
+        console.log = function() {};
       }
-      
-      if(typeof(message) === 'object' 
-          || opt_type === undefined) {
+
+      if(typeof(message) === 'object'|| 
+        opt_type === undefined) {
         // default log.
         console.log(message);
       } else if(console[opt_type] !== undefined) {
@@ -36,23 +36,23 @@
       }
     }
   };
-  
+
   EfCharts.debug = function(message) {
     EfCharts.log(message, 'debug');
   };
-  
+
   EfCharts.warn = function(message) {
     EfCharts.log(message, 'warn');
   };
-  
+
   EfCharts.info = function(message) {
     EfCharts.log(message, 'info');
   };
-  
+
   EfCharts.error = function(message) {
     EfCharts.log(message, 'error');
   };
-  
+
   /**
   *
   */
@@ -64,12 +64,12 @@
         if(EfCharts.timeFlags_ === undefined) {
           EfCharts.timeFlags_ = {};
         } else {
-          EfCharts.timeFlags_[flag] = new Date(); 
+          EfCharts.timeFlags_[flag] = new Date();
         }
       }
     }
   };
-  
+
   /**
   *
   */
@@ -78,10 +78,11 @@
       if(typeof(console.timeEnd) === 'function') {
         console.timeEnd(flag);
       } else {
-        if(EfCharts.timeFlags_ !== undefined
-        && EfCharts.timeFlags_.hasOwnProperty(flag)) {
-          EfCharts.debug(flag + ': ' 
-          + (new Date().getTime() - EfCharts.timeFlags_[flag].getTime()) + 'ms');
+        if(EfCharts.timeFlags_ !== undefined && 
+          EfCharts.timeFlags_.hasOwnProperty(flag)) {
+          EfCharts.debug(
+            flag + ': ' + 
+            (new Date().getTime() - EfCharts.timeFlags_[flag].getTime()) + 'ms');
         }
       }
     }
@@ -94,7 +95,7 @@
   EfCharts.isIntNullOrUndefined = function (integer) {
     return isNaN(parseInt(integer, 10));
   };
-  
+
   EfCharts.isStringNullEmptyOrUndefined = function (str) {
     return str === null || str === undefined || str === '';
   };
@@ -102,7 +103,7 @@
   EfCharts.log10 = function(value) {
     return Math.log(value)/Math.LN10;
   };
-  
+
   EfCharts.prototype.init_ = function (container, data) {
 
     if (!container) {
@@ -133,7 +134,7 @@
   EfCharts.prototype.xValueToDom = function (xValue) {
     var xDom = 0;
     var width = this.width_;
-    var range = this.axes_['x'].range;
+    var range = this.axes_.x.range;
     xDom = (xValue - range[0]) / (range[1] - range[0]) * width;
     return xDom;
   };
@@ -153,7 +154,7 @@
     var max = data[data.length-1][0];
     return [min, max];
   };
-  
+
   EfCharts.prototype.getYRange = function () {
     var max = -Infinity;
     var min = Infinity;
@@ -176,8 +177,8 @@
 
     // verify number of columns
     for (i = 0; i < data.length; i++) {
-      if (!EfCharts.isIntNullNaNOrUndefined(this._seriesCount)
-            && this._seriesCount !== data[i].length) {
+      if (!EfCharts.isIntNullNaNOrUndefined(this._seriesCount) && 
+          this._seriesCount !== data[i].length) {
         EfCharts.error('data is not valid. Number of columns are not constant.');
         return;
       }
@@ -212,7 +213,7 @@
     this.axes_.x = xAxis;
 
   };
-  
+
   EfCharts.getStepFromRange = function (start, end) {
     var delta = end - start;
     var decile = delta/10;
@@ -222,22 +223,22 @@
     if(step  !== 2 && step % 5 !== 0 && step !== 1) {
       step = Math.ceil(step/5.0)*5;
     }
-      
-    step = step/power;  
+
+    step = step/power;
     return step;
   };
-  
+
   EfCharts.getTicksFromRange = function(start, end) {
     var tick;
     var ticks = [];
     var xStep = EfCharts.getStepFromRange(start, end);
-    var start = Math.ceil(start/xStep) * xStep;
+    start = Math.ceil(start/xStep) * xStep;
     for (tick=start; tick <= end; tick+=xStep) {
       ticks.push(tick);
     }
     return ticks;
   };
-  
+
   EfCharts.prototype.setupTicks_ = function () {
     var xRange = this.getXRange();
     this.xTicks_ = EfCharts.getTicksFromRange(xRange[0], xRange[1]);
@@ -248,7 +249,7 @@
     this.container_.innerHtml = '';
     this.canvases_ = [];
   };
-  
+
   EfCharts.prototype.newCanvas_ = function(id){
     var canvas = document.createElement('canvas');
     canvas.id = id;
@@ -261,33 +262,34 @@
   EfCharts.prototype.render_ = function () {
     var i,
         j,
-        series, 
+        series,
         canvas,
         point,
         column,
-        columns;     
+        columns,
+        ctx;
     var xSeries = this.seriesCollection_[0];
     var round = function(val) {
       return  Math.floor(val);// Math.ceil(Math.round(val*10)/5) * 5/10;
     };
-    
+
     var createPoint = function(chart, xSeries, series, xIdx) {
       return {
         x: xSeries.values[xIdx],
         y: series.values[xIdx],
         xDom : chart.xValueToDom(xSeries.values[xIdx])
-      }
+      };
     };
     var drawColumn = function(chart, ctx, column){
       ctx.moveTo(column.xDom, chart.yValueToDom(column.yMin));
       ctx.lineTo(column.xDom, chart.yValueToDom(column.yMax));
     };
-    
+
     var drawConnection = function(chart, ctx, column){
       ctx.lineTo(column.xDom, chart.yValueToDom(column.yIn));
       ctx.moveTo(column.xDom, chart.yValueToDom(column.yOut));
     };
-     
+
     var resetColumn = function(point) {
       return {
         yMin : point.y,
@@ -298,50 +300,50 @@
         xDom : round(point.xDom)
       };
     };
-    
+
      var updateColumn = function(column, point) {
       if(column.yMax < point.y) {
         column.yMax = point.y;
       }
-            
+
       if(column.yMin > point.y) {
         column.yMin = point.y;
       }
-      
+
       column.yOut = point.y;
       column.nb++;
     };
-    
+
     // TODO: test size of container.
     if(EfCharts.isStringNullEmptyOrUndefined(this.container_.style.height)) {
       this.container_.style.height = EfCharts.DEFAULT_HEIGHT + 'px';
     }
-    
+
     if(EfCharts.isStringNullEmptyOrUndefined(this.container_.style.width)) {
       this.container_.style.width = EfCharts.DEFAULT_WIDTH + 'px';
     }
-    
+
     this.width_ = parseInt(this.container_.style.width, 10);
     this.height_ = parseInt(this.container_.style.height, 10);
-    
+
     EfCharts.info('points drawing...');
-    
+
     for (j = 1; j < this.seriesCollection_.length; j++) {
       series = this.seriesCollection_[j];
       canvas = this.newCanvas_('series-' +j);
-      var ctx = canvas.getContext('2d');
+      ctx = canvas.getContext('2d');
 
       ctx.lineWidth = 1;
       ctx.lineJoin = 'round';
       ctx.beginPath();
 
       columns = [];
-      
+
       EfCharts.time('draw points of series [' + j + ']');
-      
+
       // draw points
       for (i = 0; i < this.rowsCount_; i++) {
-        
+
         point = createPoint(this, xSeries, series, i);
 
         if(i === 0) {
@@ -360,7 +362,7 @@
             columns.push(column);
             column = resetColumn(point);
           }
-          
+
           if(i === (this.rowsCount_ - 1)) {
             // force drawing the last point.
             drawColumn(this, ctx, column);
@@ -368,9 +370,9 @@
           }
         }
      }
-      
+
       ctx.stroke();
-      
+
       // draw conections
       // using columns.
       ctx.beginPath();
@@ -378,29 +380,28 @@
         column = columns[i];
         drawConnection(this, ctx, column);
       }
-      
+
       ctx.stroke();
       EfCharts.timeEnd('draw points of series [' + j + ']');
-      
+
       this.container_.appendChild(canvas);
       this.canvases_.push(canvas);
     }
-        
+
     EfCharts.info('points drawn.');
     EfCharts.info('ticks drawing...');
-    
+
     this.canvasTicksX_ = this.newCanvas_('x-ticks');
-    ctx = this.canvasTicksX_.getContext('2d');  
+    ctx = this.canvasTicksX_.getContext('2d');
     ctx.lineWidth = 3;
-    ctx.lineJoin = 'round'; 
+    ctx.lineJoin = 'round';
     ctx.beginPath();
     for(i=0; i<this.xTicks_.length; i++){
       var xDom = this.xValueToDom(this.xTicks_[i]);
-      var yDom = this.yValueToDom(0);
       ctx.moveTo(xDom, this.height_);
       ctx.lineTo(xDom, this.height_-20);
     }
-    
+
     ctx.stroke();
     this.container_.appendChild(this.canvasTicksX_);
     EfCharts.info('ticks drawn.');
