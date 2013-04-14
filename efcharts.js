@@ -1,8 +1,23 @@
-/*jshint globalstrict: true, browser: true, devel: true */
+﻿/*jshint globalstrict: true, browser: true, devel: true */
 /*global EfCharts:false */
 (function () {
   "use strict";
   window.EfCharts = function (container, data) {
+
+    this.canvasTicksX_ = null;
+    this.canvasOver_ = null;
+    this.canvases = null;
+    this.container_ = null;
+    this.data_ = null;
+    this.width_ = null;
+    this.height_ = null;
+    this.axes_ = null;
+    this.seriesCollection_ = null;
+    this._seriesCount = null;
+    this.rowsCount_ = null;
+    this.xTicks_ = null;
+    this.yTicks_ = null;
+
     this.init_(container, data);
   };
   
@@ -12,6 +27,7 @@
 
   EfCharts.DEFAULT_WIDTH = 480;
   EfCharts.DEFAULT_HEIGHT = 320;
+  EfCharts.DEFAULT_TICKS_WIDTH = 10;
 
   EfCharts.DEBUG = true;
 
@@ -244,10 +260,42 @@
     this.xTicks_ = EfCharts.getTicksFromRange(xRange[0], xRange[1]);
   };
 
+  EfCharts.prototype.eventToDomCoords = function(event) {
+    
+    // offset for all browsers
+    // layer for firefox
+    var x = event.offsetX === undefined ? event.layerX : event.offsetX;
+    var y = event.offsetY === undefined ? event.layerY : event.offsetY;
+    return [x, y];
+  };
+
   EfCharts.prototype.preRender_ = function () {
     // delete previous constructions
     this.container_.innerHtml = '';
     this.canvases_ = [];
+    var container = this.container_;
+
+    // TODO: do tests.
+    var onMouseMove = function(e) {
+      var domCoords = this.eventToDomCoords(e);
+      var canvas = this.canvasOver_;
+      var ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.beginPath();
+      ctx.moveTo(domCoords[0], 0);
+      ctx.lineTo(domCoords[0], canvas.height);
+      ctx.stroke();
+    }.bind(this);
+    
+    // TODO: do tests.
+    var onMouseOut = function(e) {
+      var canvas = this.canvasOver_;
+      var ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }.bind(this);
+
+    container.addEventListener('mousemove', onMouseMove, false);
+    container.addEventListener('mouseout', onMouseOut, false);
   };
 
   EfCharts.prototype.newCanvas_ = function(id){
@@ -393,17 +441,21 @@
 
     this.canvasTicksX_ = this.newCanvas_('x-ticks');
     ctx = this.canvasTicksX_.getContext('2d');
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 2;
     ctx.lineJoin = 'round';
     ctx.beginPath();
     for(i=0; i<this.xTicks_.length; i++){
       var xDom = this.xValueToDom(this.xTicks_[i]);
       ctx.moveTo(xDom, this.height_);
-      ctx.lineTo(xDom, this.height_-20);
+      ctx.lineTo(xDom, this.height_-EfCharts.DEFAULT_TICKS_WIDTH);
     }
 
     ctx.stroke();
     this.container_.appendChild(this.canvasTicksX_);
     EfCharts.info('ticks drawn.');
+
+
+    this.canvasOver_ = this.newCanvas_('over');
+    this.container_.appendChild(this.canvasOver_);
   };
 }());
