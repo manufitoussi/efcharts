@@ -117,7 +117,7 @@ devel: true, vars: true, nomen: true, plusplus: true */
 
   EfCharts.isStringNullEmptyOrUndefined = function (str) {
     return str === null || str === undefined || str === '';
-  }; coucou
+  };
 
   EfCharts.log10 = function (value) {
     return Math.log(value) / Math.LN10;
@@ -235,7 +235,7 @@ devel: true, vars: true, nomen: true, plusplus: true */
 
   };
 
-  EfCharts.getStepFromRange = function (start, end) {
+  EfCharts.calculateStepFromRange = function (start, end) {
     var delta = end - start;
     var decile = delta / 10;
     var order = -Math.floor(EfCharts.log10(decile));
@@ -249,10 +249,10 @@ devel: true, vars: true, nomen: true, plusplus: true */
     return step;
   };
 
-  EfCharts.getTicksFromRange = function (start, end) {
+  EfCharts.calculateTicksFromRange = function (start, end) {
     var tick;
     var ticks = [];
-    var xStep = EfCharts.getStepFromRange(start, end);
+    var xStep = EfCharts.calculateStepFromRange(start, end);
     start = Math.ceil(start / xStep) * xStep;
     for (tick = start; tick <= end; tick += xStep) {
       ticks.push(tick);
@@ -261,8 +261,8 @@ devel: true, vars: true, nomen: true, plusplus: true */
   };
 
   EfCharts.prototype.setupTicks_ = function () {
-    var xRange = this.getXRange();
-    this.xTicks_ = EfCharts.getTicksFromRange(xRange[0], xRange[1]);
+    var xRange = this.axes_.x.range;
+    this.xTicks_ = EfCharts.calculateTicksFromRange(xRange[0], xRange[1]);
   };
 
   EfCharts.prototype.eventToDomCoords = function (event) {

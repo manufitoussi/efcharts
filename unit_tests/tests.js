@@ -192,10 +192,10 @@ devel: true, vars: true, nomen: true, plusplus: true */
     ok(charts.getAxes().y1, 'axis y1 is present');
   });
 
-  test('getStepFromRange', function () {
+  test('calculateStepFromRange', function () {
     var testRange = function (start, end, result) {
       strictEqual(
-        EfCharts.getStepFromRange(start, end),
+        EfCharts.calculateStepFromRange(start, end),
         result,
         '[' + start + ',' + end  + '] -> ' + result
       );
@@ -214,10 +214,10 @@ devel: true, vars: true, nomen: true, plusplus: true */
     testRange(1300, 1501, 20);
   });
 
-  test('getTicksFromRange', function () {
+  test('calculateTicksFromRange', function () {
     var testRange = function (start, end, result) {
       deepEqual(
-        EfCharts.getTicksFromRange(start, end),
+        EfCharts.calculateTicksFromRange(start, end),
         result,
         '[' + start + ',' + end  + '] -> ok'
       );
