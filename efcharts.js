@@ -1,6 +1,8 @@
 ﻿/*jslint indent: 2, maxlen: 80, maxerr: 50, browser: true,
 devel: true, vars: true, nomen: true, plusplus: true */
 /*global EfCharts:false */
+
+// TODO(ef): create draw layout with size.
 (function () {
   "use strict";
   window.EfCharts = function (container, data) {
@@ -29,7 +31,7 @@ devel: true, vars: true, nomen: true, plusplus: true */
 
   EfCharts.DEFAULT_WIDTH = 480;
   EfCharts.DEFAULT_HEIGHT = 320;
-  EfCharts.DEFAULT_TICKS_WIDTH = 10;
+  EfCharts.DEFAULT_TICKS_SIZE = 30;
 
   EfCharts.DEBUG = true;
 
@@ -141,6 +143,16 @@ devel: true, vars: true, nomen: true, plusplus: true */
     this.render_();
   };
 
+  EfCharts.prototype.getYTicksWidth = function () {
+    // TODO(ef): make this a per-axis parameter.
+    return EfCharts.DEFAULT_TICKS_SIZE;
+  };
+  
+  EfCharts.prototype.getXTicksHeight = function () {
+    // TODO(ef): make this a parameter.
+    return EfCharts.DEFAULT_TICKS_SIZE;
+  };
+  
   EfCharts.prototype.xDomToValue = function (xDom) {
     EfCharts.error('not implemented.');
     return null;
@@ -158,9 +170,10 @@ devel: true, vars: true, nomen: true, plusplus: true */
     }
 
     var xDom = 0;
-    var width = this.width_;
+    // one axis here
+    var width = this.width_ - this.getYTicksWidth();
     var range = this.axes_.x.range;
-    xDom = (xValue - range[0]) / (range[1] - range[0]) * width;
+    xDom = this.getYTicksWidth() + (xValue - range[0]) / (range[1] - range[0]) * width;
     return xDom;
   };
 
@@ -172,7 +185,7 @@ devel: true, vars: true, nomen: true, plusplus: true */
     }
 
     var yDom = 0;
-    var height = this.height_;
+    var height = this.height_ - this.getXTicksHeight();
     var range = this.axes_['y' + opt_axisId].range;
     yDom = (1 - (yValue - range[0]) / (range[1] - range[0])) * height;
     return yDom;
@@ -303,7 +316,7 @@ devel: true, vars: true, nomen: true, plusplus: true */
       ctx.beginPath();
       ctx.strokeStyle = 'blue';
       ctx.moveTo(domCoords[0], 0);
-      ctx.lineTo(domCoords[0], canvas.height);
+      ctx.lineTo(domCoords[0], canvas.height - this.getXTicksHeight());
       ctx.stroke();
     }.bind(this);
 
@@ -397,7 +410,6 @@ devel: true, vars: true, nomen: true, plusplus: true */
     this.canvasTicksX_ = this.newCanvas_('x-ticks');
     ctx = this.canvasTicksX_.getContext('2d');
     ctx.lineWidth = 1;
-    //ctx.lineWidth = 2;
     ctx.strokeStyle = '#aaa';
     ctx.fillStyle = 'red';
     ctx.textAlign = 'center';
@@ -405,8 +417,7 @@ devel: true, vars: true, nomen: true, plusplus: true */
     ctx.beginPath();
     for (i = 0; i < this.xTicks_.length; i++) {
       var xDom = this.xValueToDom(this.xTicks_[i]);
-      ctx.moveTo(xDom, this.height_);
-      //ctx.lineTo(xDom, this.height_ - EfCharts.DEFAULT_TICKS_WIDTH);
+      ctx.moveTo(xDom, this.height_- this.getXTicksHeight());
       ctx.lineTo(xDom, 0);
       ctx.fillText(this.xTicks_[i], xDom, this.height_);
     }
@@ -419,7 +430,6 @@ devel: true, vars: true, nomen: true, plusplus: true */
     this.canvasTicksY_ = this.newCanvas_('y-ticks');
     ctx = this.canvasTicksY_.getContext('2d');
     ctx.lineWidth = 1;
-    //ctx.lineWidth = 2;
     ctx.lineJoin = 'round';
     ctx.strokeStyle = '#aaa';
     ctx.textBaseline = 'middle';
@@ -427,9 +437,8 @@ devel: true, vars: true, nomen: true, plusplus: true */
     ctx.beginPath();
     for (i = 0; i < this.yTicks_.length; i++) {
       var yDom = this.yValueToDom(this.yTicks_[i]);
-      ctx.moveTo(0, yDom);
+      ctx.moveTo(this.getYTicksWidth(), yDom);
       ctx.lineTo(this.width_, yDom);
-      //ctx.lineTo(0 + EfCharts.DEFAULT_TICKS_WIDTH, yDom);
       ctx.fillText(this.yTicks_[i], 0, yDom);
     }
 
