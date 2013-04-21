@@ -17,6 +17,10 @@ devel: true, vars: true, nomen: true, plusplus: true */
     return this.canvasTicksX_;
   };
 
+  EfCharts.prototype.getCanvasTicksY = function () {
+    return this.canvasTicksY_;
+  };
+  
   EfCharts.prototype.getCanvasOver = function () {
     return this.canvasOver_;
   };
@@ -129,7 +133,7 @@ devel: true, vars: true, nomen: true, plusplus: true */
     testSize(charts.getCanvasTicksX(), 'xTicks canvas');
 
     // yTicks
-    // TODO
+    testSize(charts.getCanvasTicksY(), 'yTicks canvas');
   };
 
   test('efcharts default sizes', function () {
