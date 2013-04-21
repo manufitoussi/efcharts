@@ -6,6 +6,7 @@ devel: true, vars: true, nomen: true, plusplus: true */
   window.EfCharts = function (container, data) {
 
     this.canvasTicksX_ = null;
+    this.canvasTicksY_ = null;
     this.canvasOver_ = null;
     this.canvases = null;
     this.container_ = null;
@@ -151,6 +152,11 @@ devel: true, vars: true, nomen: true, plusplus: true */
   };
 
   EfCharts.prototype.xValueToDom = function (xValue) {
+    if(!this.axes_.hasOwnProperty('x')) {
+      EfCharts.error('x axis is not defined.');
+      return;
+    }
+    
     var xDom = 0;
     var width = this.width_;
     var range = this.axes_.x.range;
@@ -159,9 +165,15 @@ devel: true, vars: true, nomen: true, plusplus: true */
   };
 
   EfCharts.prototype.yValueToDom = function (yValue, opt_axisId) {
+    
+    opt_axisId = EfCharts.isIntNullOrUndefined(opt_axisId) ? 1 : opt_axisId;
+    if(!this.axes_.hasOwnProperty('y' + opt_axisId)) {
+      EfCharts.error('y' + opt_axisId +' axis is not defined.');
+      return;
+    }
+    
     var yDom = 0;
     var height = this.height_;
-    opt_axisId = EfCharts.isIntNullOrUndefined(opt_axisId) ? 1 : opt_axisId;
     var range = this.axes_['y' + opt_axisId].range;
     yDom = (1 - (yValue - range[0]) / (range[1] - range[0])) * height;
     return yDom;
@@ -261,8 +273,11 @@ devel: true, vars: true, nomen: true, plusplus: true */
   };
 
   EfCharts.prototype.setupTicks_ = function () {
+    // TODO(ef): test presence of ticks.
     var xRange = this.axes_.x.range;
+    var yRange = this.axes_.y1.range;
     this.xTicks_ = EfCharts.calculateTicksFromRange(xRange[0], xRange[1]);
+    this.yTicks_ = EfCharts.calculateTicksFromRange(yRange[0], yRange[1]);
   };
 
   EfCharts.prototype.eventToDomCoords = function (event) {
@@ -287,6 +302,7 @@ devel: true, vars: true, nomen: true, plusplus: true */
       var ctx = canvas.getContext('2d');
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.beginPath();
+      ctx.strokeStyle = 'blue'; 
       ctx.moveTo(domCoords[0], 0);
       ctx.lineTo(domCoords[0], canvas.height);
       ctx.stroke();
@@ -378,6 +394,51 @@ devel: true, vars: true, nomen: true, plusplus: true */
     this.width_ = parseInt(this.container_.style.width, 10);
     this.height_ = parseInt(this.container_.style.height, 10);
 
+    EfCharts.info('x ticks drawing...');
+    this.canvasTicksX_ = this.newCanvas_('x-ticks');
+    ctx = this.canvasTicksX_.getContext('2d');
+    ctx.lineWidth = 1;
+    //ctx.lineWidth = 2;
+    ctx.strokeStyle = '#aaa';
+    ctx.fillStyle = 'red';
+    ctx.textAlign = 'center';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    for (i = 0; i < this.xTicks_.length; i++) {
+      var xDom = this.xValueToDom(this.xTicks_[i]);
+      ctx.moveTo(xDom, this.height_);
+      //ctx.lineTo(xDom, this.height_ - EfCharts.DEFAULT_TICKS_WIDTH);
+      ctx.lineTo(xDom, 0);
+      ctx.fillText(this.xTicks_[i], xDom, this.height_);
+    }
+
+    ctx.stroke();
+    this.container_.appendChild(this.canvasTicksX_);
+    EfCharts.info('x ticks drawn.');
+    
+    EfCharts.info('y ticks drawing...');
+    this.canvasTicksY_ = this.newCanvas_('y-ticks');
+    ctx = this.canvasTicksY_.getContext('2d');
+    ctx.lineWidth = 1;
+    //ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#aaa';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'red';
+    ctx.beginPath();
+    for (i = 0; i < this.yTicks_.length; i++) {
+      var yDom = this.yValueToDom(this.yTicks_[i]);
+      ctx.moveTo(0, yDom);
+      ctx.lineTo(this.width_, yDom);
+      //ctx.lineTo(0 + EfCharts.DEFAULT_TICKS_WIDTH, yDom);
+      ctx.fillText(this.yTicks_[i], 0, yDom);
+    }
+
+    ctx.stroke();
+    this.container_.appendChild(this.canvasTicksY_);
+    EfCharts.info('y ticks drawn.');
+
+
     EfCharts.info('points drawing...');
 
     for (j = 1; j < this.seriesCollection_.length; j++) {
@@ -441,23 +502,6 @@ devel: true, vars: true, nomen: true, plusplus: true */
     }
 
     EfCharts.info('points drawn.');
-    EfCharts.info('ticks drawing...');
-
-    this.canvasTicksX_ = this.newCanvas_('x-ticks');
-    ctx = this.canvasTicksX_.getContext('2d');
-    ctx.lineWidth = 2;
-    ctx.lineJoin = 'round';
-    ctx.beginPath();
-    for (i = 0; i < this.xTicks_.length; i++) {
-      var xDom = this.xValueToDom(this.xTicks_[i]);
-      ctx.moveTo(xDom, this.height_);
-      ctx.lineTo(xDom, this.height_ - EfCharts.DEFAULT_TICKS_WIDTH);
-    }
-
-    ctx.stroke();
-    this.container_.appendChild(this.canvasTicksX_);
-    EfCharts.info('ticks drawn.');
-
 
     this.canvasOver_ = this.newCanvas_('over');
     this.container_.appendChild(this.canvasOver_);

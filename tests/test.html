@@ -11,7 +11,7 @@
 
     <script>
 		var i;
-		var N = 10000;
+		var N = 300;
     var div = document.getElementById('efcharts');
     var data1 = [
       [0, 10, 50, 60],
@@ -29,10 +29,10 @@
 		var randY = function(max) { return Math.random()*max;};
 		var dataVolume = [];
 		for(i=0; i<N; i++){
-			dataVolume.push([i, 
-			100*(1-Math.cos(2*Math.PI *i/N*100)), 
+			dataVolume.push([i/10, 
+			//100*(1-Math.cos(2*Math.PI *i/N*100)), 
 			randY(N) +i, 
-			100*(1-Math.cos(2*Math.PI *i/N*50) + randY(.5))
+			//100*(1-Math.cos(2*Math.PI *i/N*50) + randY(.5))
 			])
 		}
 		
