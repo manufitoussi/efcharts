@@ -152,11 +152,11 @@ devel: true, vars: true, nomen: true, plusplus: true */
   };
 
   EfCharts.prototype.xValueToDom = function (xValue) {
-    if(!this.axes_.hasOwnProperty('x')) {
+    if (!this.axes_.hasOwnProperty('x')) {
       EfCharts.error('x axis is not defined.');
       return;
     }
-    
+
     var xDom = 0;
     var width = this.width_;
     var range = this.axes_.x.range;
@@ -165,13 +165,12 @@ devel: true, vars: true, nomen: true, plusplus: true */
   };
 
   EfCharts.prototype.yValueToDom = function (yValue, opt_axisId) {
-    
     opt_axisId = EfCharts.isIntNullOrUndefined(opt_axisId) ? 1 : opt_axisId;
-    if(!this.axes_.hasOwnProperty('y' + opt_axisId)) {
-      EfCharts.error('y' + opt_axisId +' axis is not defined.');
+    if (!this.axes_.hasOwnProperty('y' + opt_axisId)) {
+      EfCharts.error('y' + opt_axisId + ' axis is not defined.');
       return;
     }
-    
+
     var yDom = 0;
     var height = this.height_;
     var range = this.axes_['y' + opt_axisId].range;
@@ -302,7 +301,7 @@ devel: true, vars: true, nomen: true, plusplus: true */
       var ctx = canvas.getContext('2d');
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.beginPath();
-      ctx.strokeStyle = 'blue'; 
+      ctx.strokeStyle = 'blue';
       ctx.moveTo(domCoords[0], 0);
       ctx.lineTo(domCoords[0], canvas.height);
       ctx.stroke();
@@ -415,7 +414,7 @@ devel: true, vars: true, nomen: true, plusplus: true */
     ctx.stroke();
     this.container_.appendChild(this.canvasTicksX_);
     EfCharts.info('x ticks drawn.');
-    
+
     EfCharts.info('y ticks drawing...');
     this.canvasTicksY_ = this.newCanvas_('y-ticks');
     ctx = this.canvasTicksY_.getContext('2d');
