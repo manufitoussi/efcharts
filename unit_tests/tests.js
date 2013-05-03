@@ -20,7 +20,7 @@ devel: true, vars: true, nomen: true, plusplus: true */
   EfCharts.prototype.getCanvasTicksY = function () {
     return this.canvasTicksY_;
   };
-  
+
   EfCharts.prototype.getCanvasOver = function () {
     return this.canvasOver_;
   };
@@ -152,8 +152,6 @@ devel: true, vars: true, nomen: true, plusplus: true */
     EfCharts.Tests.sizeTest(1000, 500);
   });
 
-
-
   test('ranges', function () {
     var charts = EfCharts.Tests.createCharts();
     var xRange = charts.getXRange();
@@ -164,25 +162,28 @@ devel: true, vars: true, nomen: true, plusplus: true */
   });
 
   test('xValueToDom', function () {
-    var charts = EfCharts.Tests.createCharts();
+    // TODO<ef>: What is better : test with defaullt size or custom size?
+    var charts = EfCharts.Tests.createCharts(150, 250);
     var xRange = charts.getXRange();
     var x;
     for (x = -2; x < (EfCharts.Tests.data.length + 2); x++) {
       strictEqual(charts.xValueToDom(x),
-                  (x - xRange[0]) / (xRange[1] - xRange[0]) *
-                    EfCharts.DEFAULT_WIDTH,
+                  charts.getYTicksWidth()
+                  + (x - xRange[0]) / (xRange[1] - xRange[0]) *
+                    charts.getDrawingWidth(),
                   'test ' + x);
     }
   });
 
   test('yValueToDom', function () {
-    var charts = EfCharts.Tests.createCharts();
+    // TODO<ef>: What is better : test with defaullt size or custom size?
+    var charts = EfCharts.Tests.createCharts(150, 250);
     var yRange = charts.getYRange();
     var y;
     for (y = yRange[0] - 20; y < yRange[1] + 20; y += 10) {
       strictEqual(charts.yValueToDom(y),
                   (1 - (y - yRange[0]) / (yRange[1] - yRange[0])) *
-                    EfCharts.DEFAULT_HEIGHT,
+                    charts.getDrawingHeight(),
                   'test ' + y);
     }
   });

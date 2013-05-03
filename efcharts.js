@@ -147,12 +147,20 @@ devel: true, vars: true, nomen: true, plusplus: true */
     // TODO(ef): make this a per-axis parameter.
     return EfCharts.DEFAULT_TICKS_SIZE;
   };
-  
+
   EfCharts.prototype.getXTicksHeight = function () {
     // TODO(ef): make this a parameter.
     return EfCharts.DEFAULT_TICKS_SIZE;
   };
-  
+
+  EfCharts.prototype.getDrawingWidth = function () {
+    return this.width_ - this.getYTicksWidth();
+  };
+
+  EfCharts.prototype.getDrawingHeight = function () {
+    return this.height_ - this.getXTicksHeight();
+  };
+
   EfCharts.prototype.xDomToValue = function (xDom) {
     EfCharts.error('not implemented.');
     return null;
@@ -171,9 +179,10 @@ devel: true, vars: true, nomen: true, plusplus: true */
 
     var xDom = 0;
     // one axis here
-    var width = this.width_ - this.getYTicksWidth();
+    var width = this.getDrawingWidth();
     var range = this.axes_.x.range;
-    xDom = this.getYTicksWidth() + (xValue - range[0]) / (range[1] - range[0]) * width;
+    xDom = this.getYTicksWidth()
+      + (xValue - range[0]) / (range[1] - range[0]) * width;
     return xDom;
   };
 
@@ -185,7 +194,7 @@ devel: true, vars: true, nomen: true, plusplus: true */
     }
 
     var yDom = 0;
-    var height = this.height_ - this.getXTicksHeight();
+    var height = this.getDrawingHeight();
     var range = this.axes_['y' + opt_axisId].range;
     yDom = (1 - (yValue - range[0]) / (range[1] - range[0])) * height;
     return yDom;
@@ -417,7 +426,7 @@ devel: true, vars: true, nomen: true, plusplus: true */
     ctx.beginPath();
     for (i = 0; i < this.xTicks_.length; i++) {
       var xDom = this.xValueToDom(this.xTicks_[i]);
-      ctx.moveTo(xDom, this.height_- this.getXTicksHeight());
+      ctx.moveTo(xDom, this.height_ - this.getXTicksHeight());
       ctx.lineTo(xDom, 0);
       ctx.fillText(this.xTicks_[i], xDom, this.height_);
     }
