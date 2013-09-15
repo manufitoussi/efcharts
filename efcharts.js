@@ -1,10 +1,14 @@
-﻿/*jslint indent: 2, maxlen: 80, maxerr: 50, browser: true,
+/*jslint indent: 2, maxlen: 80, maxerr: 50, browser: true,
 devel: true, vars: true, nomen: true, plusplus: true */
 /*global EfCharts:false */
 
 // TODO(ef): create draw layout with size.
 (function () {
   "use strict";
+
+  /**
+   *
+   */
   window.EfCharts = function (container, data) {
 
     this.canvasTicksX_ = null;
@@ -36,8 +40,8 @@ devel: true, vars: true, nomen: true, plusplus: true */
   EfCharts.DEBUG = true;
 
   /**
-  *
-  */
+   *
+   */
   EfCharts.log = function (message, opt_type) {
     if (EfCharts.DEBUG) {
       if (console.log === undefined) {
@@ -69,13 +73,16 @@ devel: true, vars: true, nomen: true, plusplus: true */
     EfCharts.log(message, 'info');
   };
 
+  /**
+   *
+   */
   EfCharts.error = function (message) {
     EfCharts.log(message, 'error');
   };
 
   /**
-  *
-  */
+   *
+   */
   EfCharts.time = function (flag) {
     if (EfCharts.DEBUG) {
       if (typeof (console.time) === 'function') {
@@ -91,8 +98,8 @@ devel: true, vars: true, nomen: true, plusplus: true */
   };
 
   /**
-  *
-  */
+   *
+   */
   EfCharts.timeEnd = function (flag) {
     if (EfCharts.DEBUG) {
       if (typeof (console.timeEnd) === 'function') {
@@ -110,10 +117,17 @@ devel: true, vars: true, nomen: true, plusplus: true */
     }
   };
 
+  /**
+   * Gets if an integer is NaN, null or undefined.
+   * @param {int} integer
+   */
   EfCharts.isIntNullNaNOrUndefined = function (integer) {
     return isNaN(parseInt(integer, 10));
   };
 
+  /**
+   * 
+   */
   EfCharts.isIntNullOrUndefined = function (integer) {
     return isNaN(parseInt(integer, 10));
   };
@@ -172,9 +186,10 @@ devel: true, vars: true, nomen: true, plusplus: true */
   };
 
   EfCharts.prototype.xValueToDom = function (xValue) {
+    // TODO(ef): the drawing zone is a window, axes are on the edge.
     if (!this.axes_.hasOwnProperty('x')) {
       EfCharts.error('x axis is not defined.');
-      return;
+      return null;
     }
 
     var xDom = 0;
@@ -190,7 +205,7 @@ devel: true, vars: true, nomen: true, plusplus: true */
     opt_axisId = EfCharts.isIntNullOrUndefined(opt_axisId) ? 1 : opt_axisId;
     if (!this.axes_.hasOwnProperty('y' + opt_axisId)) {
       EfCharts.error('y' + opt_axisId + ' axis is not defined.');
-      return;
+      return null;
     }
 
     var yDom = 0;
@@ -268,6 +283,9 @@ devel: true, vars: true, nomen: true, plusplus: true */
 
   };
 
+  /**
+   *
+   */
   EfCharts.calculateStepFromRange = function (start, end) {
     var delta = end - start;
     var decile = delta / 10;
@@ -282,6 +300,9 @@ devel: true, vars: true, nomen: true, plusplus: true */
     return step;
   };
 
+  /**
+   *
+   */
   EfCharts.calculateTicksFromRange = function (start, end) {
     var tick;
     var ticks = [];
@@ -310,6 +331,9 @@ devel: true, vars: true, nomen: true, plusplus: true */
     return [x, y];
   };
 
+  /**
+   *
+   */
   EfCharts.prototype.preRender_ = function () {
     // delete previous constructions
     this.container_.innerHtml = '';
@@ -340,6 +364,9 @@ devel: true, vars: true, nomen: true, plusplus: true */
     container.addEventListener('mouseout', onMouseOut, false);
   };
 
+  /**
+   *
+   */
   EfCharts.prototype.newCanvas_ = function (id) {
     var canvas = document.createElement('canvas');
     canvas.id = id;

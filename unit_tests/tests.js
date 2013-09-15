@@ -114,7 +114,7 @@ devel: true, vars: true, nomen: true, plusplus: true */
       );
     };
 
-    // TODO: test width_ and height_
+    // TODO(ef): test width_ and height_
 
     // container
     testSize(charts.getContainer().style, 'container.style');
@@ -162,7 +162,7 @@ devel: true, vars: true, nomen: true, plusplus: true */
   });
 
   test('xValueToDom', function () {
-    // TODO<ef>: What is better : test with defaullt size or custom size?
+    // TODO(ef): What is better : test with defaullt size or custom size?
     var charts = EfCharts.Tests.createCharts(150, 250);
     var xRange = charts.getXRange();
     var x;
@@ -176,7 +176,7 @@ devel: true, vars: true, nomen: true, plusplus: true */
   });
 
   test('yValueToDom', function () {
-    // TODO<ef>: What is better : test with defaullt size or custom size?
+    // TODO(ef): What is better : test with defaullt size or custom size?
     var charts = EfCharts.Tests.createCharts(150, 250);
     var yRange = charts.getYRange();
     var y;
