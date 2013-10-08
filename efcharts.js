@@ -9,7 +9,7 @@ devel: true, vars: true, nomen: true, plusplus: true */
   /**
    *
    */
-  window.EfCharts = function (container, data) {
+  var EfCharts = function (container, data) {
 
     this.canvasTicksX_ = null;
     this.canvasTicksY_ = null;
@@ -550,4 +550,6 @@ devel: true, vars: true, nomen: true, plusplus: true */
     this.canvasOver_ = this.newCanvas_('over');
     this.container_.appendChild(this.canvasOver_);
   };
+  
+  window.EfCharts = EfCharts;
 }());
